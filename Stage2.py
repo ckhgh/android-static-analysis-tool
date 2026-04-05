@@ -6,11 +6,18 @@ from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, classification_report
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    roc_auc_score,
+    classification_report,
+)
 from tqdm import tqdm
 import time
 import warnings
-from joblib import dump, load   # ← NEW: for saving/loading models
+from joblib import dump
 
 warnings.filterwarnings("ignore")
 
@@ -19,8 +26,8 @@ DATA_DIR = r"C:\Users\Samuel\Desktop\final year project\code\SparseMatrix"
 SAVE_DIR = r"C:\Users\Samuel\Desktop\final year project\code\TrainedModels"
 
 feature_path = os.path.join(DATA_DIR, "feature_names.json")
-labels_path  = os.path.join(DATA_DIR, "labels.npy")
-sparse_path  = os.path.join(DATA_DIR, "features_sparse.npz")
+labels_path = os.path.join(DATA_DIR, "labels.npy")
+sparse_path = os.path.join(DATA_DIR, "features_sparse.npz")
 
 
 print("Loading APK malware dataset...")
@@ -36,18 +43,22 @@ print(f"Loaded {len(feature_names)} features")
 print(f"Features shape: {X.shape}")
 print(f"Labels: {np.sum(y == 0)} benign + {np.sum(y == 1)} malicious\n")
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42, stratify=y
-)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
 # ================== MODELS ==================
 models = {
     "SVM (Linear)": LinearSVC(random_state=42, max_iter=10000),
     "Random Forest": RandomForestClassifier(n_estimators=200, n_jobs=-1, random_state=42),
     "XGBoost": XGBClassifier(
-        n_estimators=200, learning_rate=0.1, max_depth=6,
-        subsample=0.8, colsample_bytree=0.8, n_jobs=-1,
-        random_state=42, eval_metric="logloss", verbosity=0
+        n_estimators=200,
+        learning_rate=0.1,
+        max_depth=6,
+        subsample=0.8,
+        colsample_bytree=0.8,
+        n_jobs=-1,
+        random_state=42,
+        eval_metric="logloss",
+        verbosity=0,
     ),
 }
 
@@ -85,5 +96,3 @@ for name, model in models.items():
     print(f"Saved {name} → {model_path}")
 
 print("\nTRAINING COMPLETE!")
-
-

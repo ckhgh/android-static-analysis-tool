@@ -1,6 +1,4 @@
 import hashlib
-from androguard.core.apk import APK
-from androguard.misc import AnalyzeAPK
 import androguard.util
 
 androguard.util.set_log("CRITICAL")
