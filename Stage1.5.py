@@ -1,20 +1,25 @@
 import os
 import json
 import numpy as np
+import warnings
 from scipy import sparse
-from sklearn.feature_selection import SelectKBest, chi2
 from feature_extraction import extract_features
 from tqdm import tqdm
-
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_selection import mutual_info_classif
 
 MAL_DIR = "MaliciousExtracted"
 BEN_DIR = "BenignExtracted"
 OUTPUT_DIR = "SparseMatrix"
-os.makedirs(OUTPUT_DIR, exist_ok=True)
 MIN_DF = 5  # minimum appearance to be used for feature
 MAX_DF_RATIO = 0.99  # remove feature appeares 99% of time
-CHI2_K = 2000  # number of feature selected
+N_IG_FEATURES = 400 # how many features keep after information gain
 
+warnings.filterwarnings(
+    "ignore",
+    message=r".*Clustering metrics expects discrete values.*",
+    category=UserWarning,
+)
 
 mal_files = [os.path.join(MAL_DIR, f) for f in os.listdir(MAL_DIR) if f.endswith(".apk_analysis.json")]
 ben_files = [os.path.join(BEN_DIR, f) for f in os.listdir(BEN_DIR) if f.endswith(".apk_analysis.json")]
@@ -48,7 +53,7 @@ for row_idx, file_path in tqdm(enumerate(all_files), total=len(all_files), desc=
         if feat in feature_to_idx:
             rows.append(row_idx)  # row index of the APK
             cols.append(feature_to_idx[feat])  # column index of the feature
-            data_vals.append(value)  # 1 or 0 for prsent or not, frequency for opcode
+            data_vals.append(value)  #  frequency of feature apperance
 
 
 # compress to sparse row matrix
@@ -68,24 +73,33 @@ mask_cleanup = (df >= MIN_DF) & (df <= MAX_DF_RATIO * n_samples)
 X_clean = X_sparse[:, mask_cleanup]
 clean_feature_names = [name for i, name in enumerate(feature_to_idx.keys()) if mask_cleanup[i]]
 
-print(f"cleaned sparse matrix: ({X_clean.shape[1]:,})")
+print(f"cleaned sparse matrix: ({X_clean.shape})")
 
 
-# do chi2 to select meaningful features
-selector = SelectKBest(chi2, k=CHI2_K)
-X_selected = selector.fit_transform(X_clean, labels)
-support = selector.get_support()
-selected_feature_names = [clean_feature_names[i] for i in range(len(clean_feature_names)) if support[i]]
+# tfidf
+tfidf_transformer = TfidfTransformer()
+X_tfidf = tfidf_transformer.fit_transform(X_clean)
 
-print(f"chi2ed cleaned sparse matrix: {X_selected.shape}")
+print(f"tfidfed cleaned sparse matrix: {X_tfidf.shape}")
 
 
-# save the sparse matrix
-sparse.save_npz(os.path.join(OUTPUT_DIR, "features_sparse.npz"), X_selected)  # save sparse matrix in npz
+# ig
+mi_scores = mutual_info_classif(X_tfidf, labels)
+k = min(N_IG_FEATURES, X_tfidf.shape[1])
+top_indices = np.argsort(mi_scores)[-k:]
+X_final = X_tfidf[:, top_indices]
+final_feature_names = [clean_feature_names[i] for i in top_indices]
+
+print(f"iged tfidfed cleaned sparse matrix: {X_final.shape}")
+
+
+# save the processed matrix
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+sparse.save_npz(os.path.join(OUTPUT_DIR, "features.npz"), X_final)
 with open(
     os.path.join(OUTPUT_DIR, "feature_names.json"), "w", encoding="utf-8"
-) as f:  # save feature names of sparse matrix in json
-    json.dump(selected_feature_names, f, ensure_ascii=False, indent=2)
-np.save(os.path.join(OUTPUT_DIR, "labels.npy"), labels)  # save malicious label in npy
+) as f:
+    json.dump(final_feature_names, f, ensure_ascii=False, indent=2)
+np.save(os.path.join(OUTPUT_DIR, "labels.npy"), labels)
 
 print(f"\nDone")
