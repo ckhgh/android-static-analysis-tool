@@ -2,8 +2,8 @@ import os
 import numpy as np
 from scipy import sparse
 from sklearn.svm import LinearSVC
-from sklearn.model_selection import GridSearchCV, StratifiedKFold, cross_validate
-from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.model_selection import GridSearchCV, StratifiedKFold, cross_validate, cross_val_predict
+from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 import joblib
 
 
@@ -66,10 +66,24 @@ cv_results = cross_validate(
 
 
 # Print metrics of best model
-print(f"Accuracy  : {cv_results['test_accuracy'].mean():.4f}")
-print(f"Precision : {cv_results['test_precision'].mean():.4f}")
-print(f"Recall    : {cv_results['test_recall'].mean():.4f}")
-print(f"F1-score  : {cv_results['test_f1'].mean():.4f}")
+print(f"Accuracy  : {cv_results['test_accuracy'].mean():.6f}")
+print(f"Precision : {cv_results['test_precision'].mean():.6f}")
+print(f"Recall    : {cv_results['test_recall'].mean():.6f}")
+print(f"F1-score  : {cv_results['test_f1'].mean():.6f}")
+
+
+# print confusion matrix
+y_pred_cv = cross_val_predict(
+    best_model, x, y,
+    cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42),
+    n_jobs=-1
+)
+tn, fp, fn, tp = confusion_matrix(y, y_pred_cv).ravel()
+
+print(f"True Positives  : {tp}")
+print(f"True Negatives  : {tn}")
+print(f"False Positives : {fp}")
+print(f"False Negatives : {fn}")
 
 
 # save the model
