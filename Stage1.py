@@ -25,7 +25,6 @@ def analyze_single_apk(apk_path: str, output_folder: str) -> None:
 
     try:
         a, d, dx = AnalyzeAPK(apk_path)
-
         apis = extract_apis(dx)
         opcodes = extract_opcodes(dx)
         file_hash = calculate_file_hash(apk_path)
