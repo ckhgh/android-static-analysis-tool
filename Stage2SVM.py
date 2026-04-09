@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from scipy import sparse
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import LinearSVC
 from sklearn.model_selection import GridSearchCV, StratifiedKFold, cross_validate
 from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall_score, f1_score
 import joblib
@@ -9,7 +9,7 @@ import joblib
 
 DATA_DIR = r"C:\Users\Samuel\Desktop\final year project\code\SparseMatrix"  
 MODEL_DIR = r"C:\Users\Samuel\Desktop\final year project\code\TrainedModels"
-MODEL_FILENAME = "random_forest.joblib"
+MODEL_FILENAME = "svm.joblib"
 
 
 # load sparse matrix and label
@@ -17,38 +17,36 @@ x = sparse.load_npz(os.path.join(DATA_DIR, "features.npz"))
 y = np.load(os.path.join(DATA_DIR, "labels.npy"))
 
 
-# rf settings
-rf = RandomForestClassifier(
+# SVM settings 
+svm = LinearSVC(
     random_state=42,
-    n_jobs=-1,
+    max_iter=2000,
+    dual='auto',
 )
 
-# rf hyperparameters combination, 72 combo
+# SVM hyperparameters, 10 combo
 param_grid = {
-    'n_estimators': [100, 200, 300], # num of tree
-    'max_depth': [None, 20, 30], # max depth of tree
-    'min_samples_split': [2, 5], # min num of sample to split a node
-    'min_samples_leaf': [1, 2], # min num of sample in a node to be leaf
+    'C': [0.01, 0.1, 1, 10, 100], # regularization strength
     'class_weight': [None, 'balanced'] # apply weight on benign and malicious to balance or not
 }
 
 
-cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42) # shuffle maliciious and benign order before doing 5 fold split
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
 
 
-# finding optimal hyperparameter by look for combination with best f1 score
+# finding optimal hyperparameter by looking for combination with best f1 score
 grid_search = GridSearchCV(
-    estimator=rf,
+    estimator=svm,
     param_grid=param_grid,
     cv=cv,
     scoring='f1',
     n_jobs=-1,
     verbose=2,
 )
-grid_search.fit(x, y) # training
+grid_search.fit(x, y)  # training
 
 
-best_model = grid_search.best_estimator_ # save best model
+best_model = grid_search.best_estimator_  # save best model
 
 print(f"Best hyperparameters combination: {grid_search.best_params_}")
 
