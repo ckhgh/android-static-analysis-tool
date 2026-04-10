@@ -86,7 +86,7 @@ for json_path in tqdm(analysis_files, desc="Analyzing and classifying APKs with 
                 vector[feature_to_col[feat_name]] = value
         X_new = sparse.csr_matrix([vector])
 
-        # do classification and confidence score
+        # calculate classification score
         proba = model.predict_proba(X_new)[0][1]
 
         #save apk name and probability (we determine label later based on confidence)
