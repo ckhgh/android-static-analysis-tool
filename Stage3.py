@@ -15,10 +15,10 @@ from feature_extraction import (
 )
 
 
-APK_DIR = r"C:\Users\Samuel\Desktop\final year project\code\StaticAnalysis"
-EXTRACTED_DIR = r"C:\Users\Samuel\Desktop\final year project\code\StaticAnalysisExtracted"
-SPARSE_DIR = r"C:\Users\Samuel\Desktop\final year project\code\SparseMatrix"
-MODEL_PATH = r"C:\Users\Samuel\Desktop\final year project\code\TrainedModels\xgboost.joblib"
+APK_DIR = "StaticAnalysis"
+EXTRACTED_DIR = "StaticAnalysisExtracted"
+SPARSE_DIR = "SparseMatrix"
+MODEL_PATH = "TrainedModels/xgboost.joblib"
 MALICIOUS_THRESHOLD = 0.70
 SUSPICIOUS_THRESHOLD = 0.30
 
@@ -28,6 +28,10 @@ model = joblib.load(MODEL_PATH)
 with open(os.path.join(SPARSE_DIR, "feature_names.json"), "r", encoding="utf-8") as f:
     final_feature_names = json.load(f)
 feature_to_col = {name: idx for idx, name in enumerate(final_feature_names)}
+
+
+# Ensure the extracted directory exists
+os.makedirs(EXTRACTED_DIR, exist_ok=True)
 
 
 #same feature extraction function as stage 1

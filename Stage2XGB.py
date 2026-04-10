@@ -7,8 +7,8 @@ from sklearn.metrics import make_scorer, accuracy_score, precision_score, recall
 import joblib
 
 
-DATA_DIR = r"C:\Users\Samuel\Desktop\final year project\code\SparseMatrix"  
-MODEL_DIR = r"C:\Users\Samuel\Desktop\final year project\code\TrainedModels"
+DATA_DIR = "SparseMatrix"  
+MODEL_DIR = "TrainedModels"
 MODEL_FILENAME = "xgboost.joblib"
 
 
@@ -97,6 +97,7 @@ print(f"False Negatives : {fn}")
 
 
 # save the model
+os.makedirs(MODEL_DIR, exist_ok=True)
 model_path = os.path.join(MODEL_DIR, MODEL_FILENAME)
 joblib.dump(best_model, model_path)
 
