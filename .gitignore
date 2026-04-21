@@ -1,8 +1,5 @@
 /BenignExtracted
-/Benign
 /MaliciousExtracted
-/Malicious
 /SparseMatrix
-/StaticAnalysis
 /__pycache__
 /StaticAnalysisExtracted
