@@ -54,6 +54,7 @@ def analyze_single_apk(apk_path: str):
         }
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(extracted_features, f, indent=4, ensure_ascii=False)
+        return output_file
     except Exception as e:
         print(f"Error analyzing {filename} {e}")
         return output_file
