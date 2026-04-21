@@ -3,7 +3,7 @@ import json
 import numpy as np
 import warnings
 from scipy import sparse
-from feature_extraction import extract_features
+from feature_extraction_function import extract_features
 from tqdm import tqdm
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_selection import mutual_info_classif

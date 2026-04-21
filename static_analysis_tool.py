@@ -5,13 +5,13 @@ from scipy import sparse
 import joblib
 from tqdm import tqdm
 from androguard.misc import AnalyzeAPK
-from feature_extraction import (
+from feature_extraction_function import (
     calculate_file_hash,
     extract_manifest,
     extract_intent_filters,
     extract_apis,
     extract_opcodes,
-    extract_features
+    extract_features,
 )
 
 

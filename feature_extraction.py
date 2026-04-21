@@ -5,7 +5,7 @@ from tqdm import tqdm
 import json
 import os
 import multiprocessing
-from feature_extraction import (
+from feature_extraction_function import (
     calculate_file_hash,
     extract_manifest,
     extract_intent_filters,
